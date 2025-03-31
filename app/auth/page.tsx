@@ -41,8 +41,6 @@ export default function AuthPage() {
         console.error('Erreur chargement franchises:', error.message)
       }
       if (data) setFranchises(data)
-      console.log('Franchises chargées :', data)
-
     }
     fetchFranchises()
   }, [])
@@ -51,12 +49,12 @@ export default function AuthPage() {
     try {
       setLoading(true)
       setMessage('')
-  
+
       if (!franchiseId) {
         setMessage('❌ Veuillez sélectionner une franchise.')
         return
       }
-  
+
       await signUpUser({
         prenom,
         nom,
@@ -66,7 +64,7 @@ export default function AuthPage() {
         role,
         franchise_id: franchiseId,
       })
-  
+
       setMessage('✅ Compte créé avec succès ! Vérifie tes mails.')
     } catch (err: any) {
       setMessage(`❌ Erreur : ${err.message}`)
@@ -74,13 +72,12 @@ export default function AuthPage() {
       setLoading(false)
     }
   }
-  
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-white px-4 py-10">
-      <Image src="/logo-tsizer.png" alt="Logo TSizer" width={160} height={80} className="mb-6" />
+    <main className="flex flex-col items-center justify-center min-h-screen bg-white px-4 py-4">
+      <Image src="/logo-tsizer.png" alt="Logo TSizer" width={320} height={160} className="mb-4" />
 
-      <Tabs defaultValue="signup" className="w-full max-w-xl">
+      <Tabs defaultValue="signup" className="w-full max-w-lg">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="signup">Créer un compte</TabsTrigger>
           <TabsTrigger value="login" disabled>Se connecter</TabsTrigger>
@@ -89,9 +86,9 @@ export default function AuthPage() {
         <TabsContent value="signup">
           <Card className="mt-4 bg-[#F9FAFB] border border-[#1E4763] shadow-md">
             <CardHeader>
-              <CardTitle className="text-[#1E4763]">Créer un compte</CardTitle>
+              <CardTitle className="text-[#1E4763] text-center text-xl">Créer un compte</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="grid grid-cols-1 gap-3 p-4">
               <div>
                 <Label>Prénom *</Label>
                 <Input value={prenom} onChange={e => setPrenom(e.target.value)} />
@@ -123,7 +120,7 @@ export default function AuthPage() {
                   <option value="commercial">Commercial</option>
                 </select>
               </div>
-              <div>
+              <div className="relative z-10">
                 <Label>Franchise *</Label>
                 <select
                   value={franchiseId}
