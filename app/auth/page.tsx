@@ -1,7 +1,24 @@
+// ✅ FICHIER : app/auth/page.tsx
+
 'use client'
 
 import { useState } from 'react'
 import { signUpUser } from '@/lib/auth'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 
 export default function AuthPage() {
   const [prenom, setPrenom] = useState('')
@@ -25,7 +42,7 @@ export default function AuthPage() {
         password,
         telephone,
         role,
-        franchise_id: franchiseId
+        franchise_id: franchiseId,
       })
       setMessage('✅ Compte créé avec succès ! Vérifie tes mails.')
     } catch (err: any) {
@@ -36,27 +53,62 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="p-6 max-w-lg mx-auto space-y-4">
-      <h1 className="text-3xl font-bold">Créer un compte</h1>
+    <main className="flex items-center justify-center min-h-screen bg-white px-4">
+      <Tabs defaultValue="signup" className="w-full max-w-md">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="signup">Créer un compte</TabsTrigger>
+          <TabsTrigger value="login" disabled>Se connecter</TabsTrigger>
+        </TabsList>
 
-      <input placeholder="Prénom" value={prenom} onChange={e => setPrenom(e.target.value)} className="w-full border p-2 rounded" />
-      <input placeholder="Nom" value={nom} onChange={e => setNom(e.target.value)} className="w-full border p-2 rounded" />
-      <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full border p-2 rounded" />
-      <input placeholder="Mot de passe" type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full border p-2 rounded" />
-      <input placeholder="Téléphone (facultatif)" value={telephone} onChange={e => setTelephone(e.target.value)} className="w-full border p-2 rounded" />
-
-      <select value={role} onChange={e => setRole(e.target.value as 'responsable' | 'commercial')} className="w-full border p-2 rounded">
-        <option value="responsable">Responsable</option>
-        <option value="commercial">Commercial</option>
-      </select>
-
-      <input placeholder="ID de la franchise" value={franchiseId} onChange={e => setFranchiseId(e.target.value)} className="w-full border p-2 rounded" />
-
-      <button onClick={handleSignup} disabled={loading} className="bg-blue-600 text-white w-full p-2 rounded">
-        {loading ? 'Chargement...' : 'Créer le compte'}
-      </button>
-
-      {message && <p className="text-center mt-4">{message}</p>}
-    </div>
+        <TabsContent value="signup">
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle>Créer un compte</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Prénom</Label>
+                <Input value={prenom} onChange={e => setPrenom(e.target.value)} />
+              </div>
+              <div>
+                <Label>Nom</Label>
+                <Input value={nom} onChange={e => setNom(e.target.value)} />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input type="email" value={email} onChange={e => setEmail(e.target.value)} />
+              </div>
+              <div>
+                <Label>Mot de passe</Label>
+                <Input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+              </div>
+              <div>
+                <Label>Téléphone (facultatif)</Label>
+                <Input value={telephone} onChange={e => setTelephone(e.target.value)} />
+              </div>
+              <div>
+                <Label>Rôle</Label>
+                <select
+                  value={role}
+                  onChange={e => setRole(e.target.value as 'responsable' | 'commercial')}
+                  className="w-full border p-2 rounded"
+                >
+                  <option value="responsable">Responsable</option>
+                  <option value="commercial">Commercial</option>
+                </select>
+              </div>
+              <div>
+                <Label>ID de la franchise</Label>
+                <Input value={franchiseId} onChange={e => setFranchiseId(e.target.value)} />
+              </div>
+              <Button onClick={handleSignup} disabled={loading} className="w-full">
+                {loading ? 'Création en cours...' : 'Créer le compte'}
+              </Button>
+              {message && <p className="text-center text-sm mt-2">{message}</p>}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </main>
   )
 }
