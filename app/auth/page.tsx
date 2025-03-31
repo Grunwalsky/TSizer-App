@@ -1,78 +1,62 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+'use client'
+
+import { useState } from 'react'
+import { signUpUser } from '@/lib/auth'
 
 export default function AuthPage() {
+  const [prenom, setPrenom] = useState('')
+  const [nom, setNom] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [telephone, setTelephone] = useState('')
+  const [role, setRole] = useState<'responsable' | 'commercial'>('commercial')
+  const [franchiseId, setFranchiseId] = useState('')
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSignup = async () => {
+    try {
+      setLoading(true)
+      setMessage('')
+      await signUpUser({
+        prenom,
+        nom,
+        email,
+        password,
+        telephone,
+        role,
+        franchise_id: franchiseId
+      })
+      setMessage('✅ Compte créé avec succès ! Vérifie tes mails.')
+    } catch (err: any) {
+      setMessage(`❌ Erreur : ${err.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-white text-[#1E4763] flex items-center justify-center p-4">
-      <Card className="w-full max-w-md rounded-2xl border-[#1E4763] border-2 shadow-lg">
-        <Tabs defaultValue="login">
-          <TabsList className="grid grid-cols-2">
-            <TabsTrigger value="login">Connexion</TabsTrigger>
-            <TabsTrigger value="register">Créer un compte</TabsTrigger>
-          </TabsList>
+    <div className="p-6 max-w-lg mx-auto space-y-4">
+      <h1 className="text-3xl font-bold">Créer un compte</h1>
 
-          {/* Connexion */}
-          <TabsContent value="login">
-            <CardContent className="space-y-4">
-              <img src="/logo-tsizer.png" alt="Logo TSizer" className="h-16 mx-auto" />
-              <h2 className="text-2xl font-bold text-center">Connexion</h2>
-              <div className="space-y-2">
-                <Label>Email</Label>
-                <Input type="email" placeholder="exemple@mail.com" />
-              </div>
-              <div className="space-y-2">
-                <Label>Mot de passe</Label>
-                <Input type="password" placeholder="••••••••" />
-              </div>
-              <Button className="w-full bg-[#95C11F] text-white hover:bg-[#7ea615]">
-                Se connecter
-              </Button>
-              <p className="text-sm text-right text-gray-500 cursor-pointer hover:underline">
-                Mot de passe oublié ?
-              </p>
-            </CardContent>
-          </TabsContent>
+      <input placeholder="Prénom" value={prenom} onChange={e => setPrenom(e.target.value)} className="w-full border p-2 rounded" />
+      <input placeholder="Nom" value={nom} onChange={e => setNom(e.target.value)} className="w-full border p-2 rounded" />
+      <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full border p-2 rounded" />
+      <input placeholder="Mot de passe" type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full border p-2 rounded" />
+      <input placeholder="Téléphone (facultatif)" value={telephone} onChange={e => setTelephone(e.target.value)} className="w-full border p-2 rounded" />
 
-          {/* Création de compte */}
-          <TabsContent value="register">
-            <CardContent className="space-y-4">
-              <img src="/logo-tsizer.png" alt="Logo TSizer" className="h-16 mx-auto" />
-              <h2 className="text-2xl font-bold text-center">Créer un compte</h2>
-              <div className="space-y-2">
-                <Label>Nom</Label>
-                <Input placeholder="Nom" />
-              </div>
-              <div className="space-y-2">
-                <Label>Prénom</Label>
-                <Input placeholder="Prénom" />
-              </div>
-              <div className="space-y-2">
-                <Label>Email</Label>
-                <Input type="email" placeholder="exemple@mail.com" />
-              </div>
-              <div className="space-y-2">
-                <Label>Téléphone</Label>
-                <Input type="tel" placeholder="06 12 34 56 78" />
-              </div>
-              <div className="space-y-2">
-                <Label>Mot de passe</Label>
-                <Input type="password" placeholder="••••••••" />
-              </div>
-              <Button className="w-full bg-[#95C11F] text-white hover:bg-[#7ea615]">
-                S&apos;inscrire
-              </Button>
-            </CardContent>
-          </TabsContent>
-        </Tabs>
-      </Card>
+      <select value={role} onChange={e => setRole(e.target.value as 'responsable' | 'commercial')} className="w-full border p-2 rounded">
+        <option value="responsable">Responsable</option>
+        <option value="commercial">Commercial</option>
+      </select>
+
+      <input placeholder="ID de la franchise" value={franchiseId} onChange={e => setFranchiseId(e.target.value)} className="w-full border p-2 rounded" />
+
+      <button onClick={handleSignup} disabled={loading} className="bg-blue-600 text-white w-full p-2 rounded">
+        {loading ? 'Chargement...' : 'Créer le compte'}
+      </button>
+
+      {message && <p className="text-center mt-4">{message}</p>}
     </div>
-  );
+  )
 }
