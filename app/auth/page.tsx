@@ -49,22 +49,32 @@ export default function AuthPage() {
     try {
       setLoading(true)
       setMessage('')
-
+  
       if (!franchiseId) {
         setMessage('❌ Veuillez sélectionner une franchise.')
         return
       }
-
-      await signUpUser({
-        prenom,
-        nom,
-        email,
-        password,
-        telephone,
-        role,
-        franchise_id: franchiseId,
+  
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prenom,
+          nom,
+          email,
+          password,
+          telephone,
+          role,
+          franchise_id: franchiseId,
+        }),
       })
-
+  
+      const result = await res.json()
+  
+      if (!res.ok) {
+        throw new Error(result.error || 'Erreur inconnue.')
+      }
+  
       setMessage('✅ Compte créé avec succès ! Vérifie tes mails.')
     } catch (err: any) {
       setMessage(`❌ Erreur : ${err.message}`)
@@ -72,6 +82,7 @@ export default function AuthPage() {
       setLoading(false)
     }
   }
+  
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-white px-4 py-4">
