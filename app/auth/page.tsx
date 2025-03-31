@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { signUpUser } from '@/lib/auth'
 import {
   Tabs,
@@ -19,6 +19,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import Image from 'next/image'
+import { supabase } from '@/lib/supabase'
 
 export default function AuthPage() {
   const [prenom, setPrenom] = useState('')
@@ -28,8 +30,17 @@ export default function AuthPage() {
   const [telephone, setTelephone] = useState('')
   const [role, setRole] = useState<'responsable' | 'commercial'>('commercial')
   const [franchiseId, setFranchiseId] = useState('')
+  const [franchises, setFranchises] = useState<{ id: string; nom: string }[]>([])
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const fetchFranchises = async () => {
+      const { data, error } = await supabase.from('franchises').select('id, nom')
+      if (data) setFranchises(data)
+    }
+    fetchFranchises()
+  }, [])
 
   const handleSignup = async () => {
     try {
@@ -53,7 +64,9 @@ export default function AuthPage() {
   }
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-white px-4">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-white px-4">
+      <Image src="/logo-tsizer.png" alt="Logo TSizer" width={160} height={80} className="mb-6" />
+
       <Tabs defaultValue="signup" className="w-full max-w-md">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="signup">Créer un compte</TabsTrigger>
@@ -98,8 +111,17 @@ export default function AuthPage() {
                 </select>
               </div>
               <div>
-                <Label>ID de la franchise</Label>
-                <Input value={franchiseId} onChange={e => setFranchiseId(e.target.value)} />
+                <Label>Franchise</Label>
+                <select
+                  value={franchiseId}
+                  onChange={e => setFranchiseId(e.target.value)}
+                  className="w-full border p-2 rounded"
+                >
+                  <option value="">-- Sélectionner une franchise --</option>
+                  {franchises.map(f => (
+                    <option key={f.id} value={f.id}>{f.nom}</option>
+                  ))}
+                </select>
               </div>
               <Button onClick={handleSignup} disabled={loading} className="w-full">
                 {loading ? 'Création en cours...' : 'Créer le compte'}
