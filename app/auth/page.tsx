@@ -69,7 +69,7 @@ export default function AuthPage() {
                 <Input type="password" placeholder="••••••••" />
               </div>
               <Button className="w-full bg-[#95C11F] text-white hover:bg-[#7ea615]">
-                S'inscrire
+             S&apos;inscrire
               </Button>
             </CardContent>
           </TabsContent>
