@@ -41,6 +41,8 @@ export default function AuthPage() {
         console.error('Erreur chargement franchises:', error.message)
       }
       if (data) setFranchises(data)
+      console.log('Franchises chargées :', data)
+
     }
     fetchFranchises()
   }, [])
@@ -49,6 +51,12 @@ export default function AuthPage() {
     try {
       setLoading(true)
       setMessage('')
+  
+      if (!franchiseId) {
+        setMessage('❌ Veuillez sélectionner une franchise.')
+        return
+      }
+  
       await signUpUser({
         prenom,
         nom,
@@ -58,6 +66,7 @@ export default function AuthPage() {
         role,
         franchise_id: franchiseId,
       })
+  
       setMessage('✅ Compte créé avec succès ! Vérifie tes mails.')
     } catch (err: any) {
       setMessage(`❌ Erreur : ${err.message}`)
@@ -65,6 +74,7 @@ export default function AuthPage() {
       setLoading(false)
     }
   }
+  
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-white px-4 py-10">
