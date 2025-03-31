@@ -55,6 +55,11 @@ export default function AuthPage() {
         return
       }
   
+      if (password.length < 8 || !/[a-z]/.test(password) || !/[A-Z]/.test(password)) {
+        setMessage('❌ Le mot de passe doit contenir au moins 8 caractères, une majuscule et une minuscule.')
+        return
+      }
+  
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
