@@ -33,6 +33,8 @@ export default function AuthPage() {
   const [franchises, setFranchises] = useState<{ id: string; nom: string }[]>([])
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+
 
   useEffect(() => {
     const fetchFranchises = async () => {
@@ -133,10 +135,24 @@ export default function AuthPage() {
                 <Label>Email *</Label>
                 <Input type="email" value={email} onChange={e => setEmail(e.target.value)} />
               </div>
-              <div>
+              <div className="relative">
                 <Label>Mot de passe *</Label>
-                <Input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+               <Input
+                 type={showPassword ? 'text' : 'password'}
+                value={password}
+                 onChange={e => setPassword(e.target.value)}
+                 className="pr-10"
+                   />
+               <button
+               type="button"
+              onClick={() => setShowPassword(!showPassword)}
+               className="absolute right-2 top-[34px] text-sm text-gray-500"
+              tabIndex={-1}
+                >
+              {showPassword ? '🙈' : '👁️'}
+             </button>
               </div>
+
               <div>
                 <Label>Téléphone</Label>
                 <Input value={telephone} onChange={e => setTelephone(e.target.value)} />
