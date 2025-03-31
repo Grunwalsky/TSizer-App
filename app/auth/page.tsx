@@ -1,4 +1,4 @@
-// Page de connexion TSizer v1
+// Page de connexion TSizer v1.1
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
