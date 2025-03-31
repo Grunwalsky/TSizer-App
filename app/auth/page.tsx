@@ -54,11 +54,27 @@ export default function AuthPage() {
         setMessage('❌ Veuillez sélectionner une franchise.')
         return
       }
-  
+      
+      if (!prenom.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/)) {
+        setMessage('❌ Le prénom ne doit contenir que des lettres.')
+        return
+      }
+      
+      if (!nom.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/)) {
+        setMessage('❌ Le nom ne doit contenir que des lettres.')
+        return
+      }
+      
+      if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        setMessage('❌ L’adresse email n’est pas valide.')
+        return
+      }
+      
       if (password.length < 8 || !/[a-z]/.test(password) || !/[A-Z]/.test(password)) {
         setMessage('❌ Le mot de passe doit contenir au moins 8 caractères, une majuscule et une minuscule.')
         return
       }
+      
   
       const res = await fetch('/api/signup', {
         method: 'POST',
