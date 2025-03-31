@@ -37,6 +37,9 @@ export default function AuthPage() {
   useEffect(() => {
     const fetchFranchises = async () => {
       const { data, error } = await supabase.from('franchises').select('id, nom')
+      if (error) {
+        console.error('Erreur chargement franchises:', error.message)
+      }
       if (data) setFranchises(data)
     }
     fetchFranchises()
@@ -64,43 +67,43 @@ export default function AuthPage() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-white px-4">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-white px-4 py-10">
       <Image src="/logo-tsizer.png" alt="Logo TSizer" width={160} height={80} className="mb-6" />
 
-      <Tabs defaultValue="signup" className="w-full max-w-md">
+      <Tabs defaultValue="signup" className="w-full max-w-xl">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="signup">Créer un compte</TabsTrigger>
           <TabsTrigger value="login" disabled>Se connecter</TabsTrigger>
         </TabsList>
 
         <TabsContent value="signup">
-          <Card className="mt-4">
+          <Card className="mt-4 bg-[#F9FAFB] border border-[#1E4763] shadow-md">
             <CardHeader>
-              <CardTitle>Créer un compte</CardTitle>
+              <CardTitle className="text-[#1E4763]">Créer un compte</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Prénom</Label>
+                <Label>Prénom *</Label>
                 <Input value={prenom} onChange={e => setPrenom(e.target.value)} />
               </div>
               <div>
-                <Label>Nom</Label>
+                <Label>Nom *</Label>
                 <Input value={nom} onChange={e => setNom(e.target.value)} />
               </div>
               <div>
-                <Label>Email</Label>
+                <Label>Email *</Label>
                 <Input type="email" value={email} onChange={e => setEmail(e.target.value)} />
               </div>
               <div>
-                <Label>Mot de passe</Label>
+                <Label>Mot de passe *</Label>
                 <Input type="password" value={password} onChange={e => setPassword(e.target.value)} />
               </div>
               <div>
-                <Label>Téléphone (facultatif)</Label>
+                <Label>Téléphone</Label>
                 <Input value={telephone} onChange={e => setTelephone(e.target.value)} />
               </div>
               <div>
-                <Label>Rôle</Label>
+                <Label>Fonction *</Label>
                 <select
                   value={role}
                   onChange={e => setRole(e.target.value as 'responsable' | 'commercial')}
@@ -111,7 +114,7 @@ export default function AuthPage() {
                 </select>
               </div>
               <div>
-                <Label>Franchise</Label>
+                <Label>Franchise *</Label>
                 <select
                   value={franchiseId}
                   onChange={e => setFranchiseId(e.target.value)}
@@ -123,7 +126,7 @@ export default function AuthPage() {
                   ))}
                 </select>
               </div>
-              <Button onClick={handleSignup} disabled={loading} className="w-full">
+              <Button onClick={handleSignup} disabled={loading} className="w-full bg-[#95C11F] text-[#1E4763] hover:bg-[#85ab1c]">
                 {loading ? 'Création en cours...' : 'Créer le compte'}
               </Button>
               {message && <p className="text-center text-sm mt-2">{message}</p>}
