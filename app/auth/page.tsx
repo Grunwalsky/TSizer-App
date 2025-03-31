@@ -1,5 +1,3 @@
-// Page de connexion TSizer v1.1
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,8 +11,8 @@ import {
 
 export default function AuthPage() {
   return (
-    <div className="min-h-screen bg-[#1E4763] flex items-center justify-center p-4">
-      <Card className="w-full max-w-md rounded-2xl shadow-lg">
+    <div className="min-h-screen bg-white text-[#1E4763] flex items-center justify-center p-4">
+      <Card className="w-full max-w-md rounded-2xl border-[#1E4763] border-2 shadow-lg">
         <Tabs defaultValue="login">
           <TabsList className="grid grid-cols-2">
             <TabsTrigger value="login">Connexion</TabsTrigger>
@@ -25,7 +23,7 @@ export default function AuthPage() {
           <TabsContent value="login">
             <CardContent className="space-y-4">
               <img src="/logo-tsizer.png" alt="Logo TSizer" className="h-16 mx-auto" />
-              <h2 className="text-2xl font-bold text-center text-[#1E4763]">Connexion</h2>
+              <h2 className="text-2xl font-bold text-center">Connexion</h2>
               <div className="space-y-2">
                 <Label>Email</Label>
                 <Input type="email" placeholder="exemple@mail.com" />
@@ -47,7 +45,7 @@ export default function AuthPage() {
           <TabsContent value="register">
             <CardContent className="space-y-4">
               <img src="/logo-tsizer.png" alt="Logo TSizer" className="h-16 mx-auto" />
-              <h2 className="text-2xl font-bold text-center text-[#1E4763]">Créer un compte</h2>
+              <h2 className="text-2xl font-bold text-center">Créer un compte</h2>
               <div className="space-y-2">
                 <Label>Nom</Label>
                 <Input placeholder="Nom" />
@@ -69,7 +67,7 @@ export default function AuthPage() {
                 <Input type="password" placeholder="••••••••" />
               </div>
               <Button className="w-full bg-[#95C11F] text-white hover:bg-[#7ea615]">
-             S&apos;inscrire
+                S&apos;inscrire
               </Button>
             </CardContent>
           </TabsContent>
