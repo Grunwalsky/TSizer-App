@@ -10,7 +10,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen">
       {/* ✅ Colonne de navigation */}
       <aside className="w-64 bg-[#1E4763] text-white flex flex-col p-4">
-        <Image src="/logo-tilkeo.png" alt="Logo Tilkeo" width={160} height={80} className="mb-8" />
+        <Image src="/logo-tsizer.png" alt="Logo Tilkeo" width={160} height={80} className="mb-8" />
 
         {/* CHIFFRAGE */}
         <div className="mb-6">
