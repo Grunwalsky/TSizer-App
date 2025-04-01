@@ -11,6 +11,7 @@ const supabaseAdmin = createClient(
 export async function POST(req: Request) {
   try {
     const body = await req.json()
+
     const { prenom, nom, email, password, telephone, role, franchise_id } = body
 
     // 1. Vérifier si un utilisateur avec cet email existe déjà dans Supabase Auth
@@ -25,24 +26,16 @@ export async function POST(req: Request) {
       )
     }
 
-    // 2. Créer l'utilisateur dans Supabase Auth (validation admin supabase))
+    // 2. Créer le compte dans Auth (en confirmant l'email directement)
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      email_confirm: false, // ← n'envoie pas de mail
-      user_metadata: {
-        active: false, // ← on l’utilise pour savoir si tu as activé le compte manuellement
-      },
+      email_confirm: true
     })
-    
 
     if (authError) throw new Error(authError.message)
 
-    // 3. Ajouter dans la table "users" uniquement si le compte a bien été créé dans Auth
-    if (!authData.user?.id) {
-      throw new Error("Impossible de créer l'utilisateur dans la base.")
-    }
-
+    // 3. Ajouter dans la table "users"
     const { error: insertError } = await supabaseAdmin.from('users').insert({
       id: authData.user?.id,
       prenom,
@@ -51,10 +44,10 @@ export async function POST(req: Request) {
       telephone: telephone || '',
       role,
       franchise_id,
-      active: false, // Ajouté ici
+      active: false // ✅ tu pourras passer à true manuellement pour activer
     })
 
-    if (insertError) throw new Error('Erreur lors de l’enregistrement dans la base : ' + insertError.message)
+    if (insertError) throw new Error(insertError.message)
 
     return NextResponse.json({ success: true }, { status: 200 })
   } catch (err: any) {
