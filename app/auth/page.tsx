@@ -3,7 +3,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { signUpUser } from '@/lib/auth'
 import {
   Tabs,
   TabsContent,
@@ -21,10 +20,8 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 
 export default function AuthPage() {
-  const router = useRouter()
   const [prenom, setPrenom] = useState('')
   const [nom, setNom] = useState('')
   const [email, setEmail] = useState('')
@@ -36,10 +33,7 @@ export default function AuthPage() {
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-
-  const [loginEmail, setLoginEmail] = useState('')
-  const [loginPassword, setLoginPassword] = useState('')
-  const [loginError, setLoginError] = useState('')
+  const [tab, setTab] = useState<'signup' | 'login'>('signup')
 
   useEffect(() => {
     const fetchFranchises = async () => {
@@ -61,18 +55,22 @@ export default function AuthPage() {
         setMessage('❌ Veuillez sélectionner une franchise.')
         return
       }
+
       if (!prenom.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/)) {
         setMessage('❌ Le prénom ne doit contenir que des lettres.')
         return
       }
+
       if (!nom.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/)) {
         setMessage('❌ Le nom ne doit contenir que des lettres.')
         return
       }
+
       if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
         setMessage('❌ L’adresse email n’est pas valide.')
         return
       }
+
       if (password.length < 8 || !/[a-z]/.test(password) || !/[A-Z]/.test(password)) {
         setMessage('❌ Le mot de passe doit contenir au moins 8 caractères, une majuscule et une minuscule.')
         return
@@ -103,15 +101,24 @@ export default function AuthPage() {
   }
 
   const handleLogin = async () => {
-    setLoginError('')
-    const { error } = await supabase.auth.signInWithPassword({
-      email: loginEmail,
-      password: loginPassword,
-    })
-    if (error) {
-      setLoginError('❌ Email ou mot de passe incorrect.')
-    } else {
-      router.push('/')
+    try {
+      setLoading(true)
+      setMessage('')
+
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Erreur inconnue.')
+
+      setMessage('✅ Connexion réussie !')
+    } catch (err: any) {
+      setMessage(`❌ Erreur : ${err.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -119,12 +126,13 @@ export default function AuthPage() {
     <main className="flex flex-col items-center justify-center min-h-screen bg-white px-4 py-4">
       <Image src="/logo-tsizer.png" alt="Logo TSizer" width={320} height={160} className="mb-4" />
 
-      <Tabs defaultValue="signup" className="w-full max-w-lg">
+      <Tabs value={tab} onValueChange={(val) => setTab(val as 'signup' | 'login')} className="w-full max-w-lg">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="signup">Créer un compte</TabsTrigger>
           <TabsTrigger value="login">Se connecter</TabsTrigger>
         </TabsList>
 
+        {/* --- CRÉATION DE COMPTE --- */}
         <TabsContent value="signup">
           <Card className="mt-4 bg-[#F9FAFB] border border-[#1E4763] shadow-md">
             <CardHeader>
@@ -196,27 +204,38 @@ export default function AuthPage() {
           </Card>
         </TabsContent>
 
+        {/* --- CONNEXION --- */}
         <TabsContent value="login">
           <Card className="mt-4 bg-[#F9FAFB] border border-[#1E4763] shadow-md">
             <CardHeader>
-              <CardTitle className="text-[#1E4763] text-center text-xl">Connexion</CardTitle>
+              <CardTitle className="text-[#1E4763] text-center text-xl">Se connecter</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-3 p-4">
               <div>
                 <Label>Email</Label>
-                <Input type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} />
+                <Input type="email" value={email} onChange={e => setEmail(e.target.value)} />
               </div>
-              <div>
+              <div className="relative">
                 <Label>Mot de passe</Label>
-                <Input type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} />
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-[34px] text-sm text-gray-500"
+                  tabIndex={-1}
+                >
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
               </div>
-              <Button onClick={handleLogin} className="w-full bg-[#95C11F] text-[#1E4763] hover:bg-[#85ab1c]">
-                Se connecter
+              <Button onClick={handleLogin} disabled={loading} className="w-full bg-[#95C11F] text-[#1E4763] hover:bg-[#85ab1c]">
+                {loading ? 'Connexion en cours...' : 'Se connecter'}
               </Button>
-              {loginError && <p className="text-center text-sm mt-2 text-red-500">{loginError}</p>}
-              <p className="text-right text-sm mt-1">
-                <a href="/reset-password" className="text-[#1E4763] underline">Mot de passe oublié ?</a>
-              </p>
+              {message && <p className="text-center text-sm mt-2">{message}</p>}
             </CardContent>
           </Card>
         </TabsContent>
