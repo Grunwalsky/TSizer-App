@@ -90,7 +90,13 @@ export default function AuthPage() {
         }),
       })
 
-      const result = await res.json()
+      let result
+      try {
+       result = await res.json()
+      } catch {
+       result = { error: 'Erreur de réponse du serveur.' }
+      }
+
       if (!res.ok) throw new Error(result.error || 'Erreur inconnue.')
       setMessage('✅ Compte créé avec succès ! Vérifie tes mails.')
     } catch (err: any) {
