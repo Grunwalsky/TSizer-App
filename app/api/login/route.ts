@@ -1,7 +1,7 @@
 // ✅ FICHIER : app/api/login/route.ts
 
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -12,27 +12,24 @@ export async function POST(req: Request) {
   try {
     const { email, password } = await req.json()
 
-    // Vérifier si l'utilisateur existe dans la table "users"
-    const { data: users, error: fetchError } = await supabase
+    // Vérifie si l'utilisateur existe
+    const { data: users, error: userCheckError } = await supabase
       .from('users')
       .select('id')
       .eq('email', email)
 
-    if (fetchError) {
-      return NextResponse.json({ error: 'Erreur de vérification.' }, { status: 500 })
-    }
+    if (userCheckError) throw new Error('Erreur de vérification : ' + userCheckError.message)
 
     if (!users || users.length === 0) {
       return NextResponse.json({ error: 'Utilisateur non trouvé.' }, { status: 404 })
     }
 
-    // Connexion avec une instance publique
     const publicClient = createClient(
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_ANON_KEY!
     )
 
-    const { data, error: loginError } = await publicClient.auth.signInWithPassword({ email, password })
+    const { error: loginError } = await publicClient.auth.signInWithPassword({ email, password })
 
     if (loginError) {
       return NextResponse.json({ error: 'Mot de passe incorrect.' }, { status: 401 })
@@ -40,6 +37,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ message: 'Connexion réussie.' }, { status: 200 })
   } catch (err: any) {
-    return NextResponse.json({ error: 'Erreur inconnue.' }, { status: 500 })
+    return NextResponse.json({ error: err.message || 'Erreur inconnue.' }, { status: 500 })
   }
 }

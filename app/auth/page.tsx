@@ -1,27 +1,19 @@
-// ✅ FICHIER : app/auth/page.tsx
-
 'use client'
 
-import { useEffect, useState } from 'react'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from '@/components/ui/card'
+import { useState, useEffect, ChangeEvent } from 'react'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import Image from 'next/image'
-import { supabase } from '@/lib/supabase'
 
 export default function AuthPage() {
+  const [tab, setTab] = useState<'signup' | 'login'>('signup')
+  const [showPassword, setShowPassword] = useState(false)
+
   const [prenom, setPrenom] = useState('')
   const [nom, setNom] = useState('')
   const [email, setEmail] = useState('')
@@ -32,16 +24,14 @@ export default function AuthPage() {
   const [franchises, setFranchises] = useState<{ id: string; nom: string }[]>([])
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [tab, setTab] = useState<'signup' | 'login'>('signup')
+
+  const router = useRouter()
 
   useEffect(() => {
     const fetchFranchises = async () => {
       const { data, error } = await supabase.from('franchises').select('id, nom')
-      if (error) {
-        console.error('Erreur chargement franchises:', error.message)
-      }
       if (data) setFranchises(data)
+      if (error) console.error('Erreur chargement franchises:', error.message)
     }
     fetchFranchises()
   }, [])
@@ -79,20 +69,14 @@ export default function AuthPage() {
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prenom,
-          nom,
-          email,
-          password,
-          telephone,
-          role,
-          franchise_id: franchiseId,
-        }),
+        body: JSON.stringify({ prenom, nom, email, password, telephone, role, franchise_id: franchiseId }),
       })
 
       const result = await res.json()
+
       if (!res.ok) throw new Error(result.error || 'Erreur inconnue.')
-      setMessage('✅ Compte créé avec succès ! Vérifie tes mails.')
+
+      setMessage('✅ Compte créé avec succès !')
     } catch (err: any) {
       setMessage(`❌ Erreur : ${err.message}`)
     } finally {
@@ -101,26 +85,32 @@ export default function AuthPage() {
   }
 
   const handleLogin = async () => {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
-    
-    let result
     try {
-      result = await res.json()
-    } catch (e) {
-      setMessage('❌ Erreur inconnue.')
-      return
+      setLoading(true)
+      setMessage('')
+
+      if (!email || !password) {
+        setMessage('❌ Merci de renseigner votre email et mot de passe.')
+        return
+      }
+
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const result = await res.json()
+
+      if (!res.ok) throw new Error(result.error || 'Erreur inconnue.')
+
+      setMessage('✅ Mot de passe correct. Connexion...')
+      router.push('/dashboard') // À adapter selon ta structure
+    } catch (err: any) {
+      setMessage(`❌ Erreur : ${err.message}`)
+    } finally {
+      setLoading(false)
     }
-    
-    if (!res.ok) {
-      setMessage(`❌ Erreur : ${result.error}`)
-      return
-    }
-    
-    setMessage('✅ Connexion réussie.')
   }
 
   return (
@@ -133,68 +123,36 @@ export default function AuthPage() {
           <TabsTrigger value="login">Se connecter</TabsTrigger>
         </TabsList>
 
-        {/* --- CRÉATION DE COMPTE --- */}
+        {/* Signup */}
         <TabsContent value="signup">
           <Card className="mt-4 bg-[#F9FAFB] border border-[#1E4763] shadow-md">
             <CardHeader>
               <CardTitle className="text-[#1E4763] text-center text-xl">Créer un compte</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-3 p-4">
-              <div>
-                <Label>Prénom *</Label>
-                <Input value={prenom} onChange={e => setPrenom(e.target.value)} />
-              </div>
-              <div>
-                <Label>Nom *</Label>
-                <Input value={nom} onChange={e => setNom(e.target.value)} />
-              </div>
-              <div>
-                <Label>Email *</Label>
-                <Input type="email" value={email} onChange={e => setEmail(e.target.value)} />
-              </div>
+              <div><Label>Prénom *</Label><Input value={prenom} onChange={e => setPrenom(e.target.value)} /></div>
+              <div><Label>Nom *</Label><Input value={nom} onChange={e => setNom(e.target.value)} /></div>
+              <div><Label>Email *</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} /></div>
               <div className="relative">
                 <Label>Mot de passe *</Label>
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-[34px] text-sm text-gray-500"
-                  tabIndex={-1}
-                >
+                <Input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} className="pr-10" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-[34px] text-sm text-gray-500" tabIndex={-1}>
                   {showPassword ? '🙈' : '👁️'}
                 </button>
               </div>
-              <div>
-                <Label>Téléphone</Label>
-                <Input value={telephone} onChange={e => setTelephone(e.target.value)} />
-              </div>
+              <div><Label>Téléphone</Label><Input value={telephone} onChange={e => setTelephone(e.target.value)} /></div>
               <div>
                 <Label>Fonction *</Label>
-                <select
-                  value={role}
-                  onChange={e => setRole(e.target.value as 'responsable' | 'commercial')}
-                  className="w-full border p-2 rounded"
-                >
+                <select value={role} onChange={e => setRole(e.target.value as 'responsable' | 'commercial')} className="w-full border p-2 rounded">
                   <option value="responsable">Responsable</option>
                   <option value="commercial">Commercial</option>
                 </select>
               </div>
-              <div className="relative z-10">
+              <div>
                 <Label>Franchise *</Label>
-                <select
-                  value={franchiseId}
-                  onChange={e => setFranchiseId(e.target.value)}
-                  className="w-full border p-2 rounded"
-                >
+                <select value={franchiseId} onChange={e => setFranchiseId(e.target.value)} className="w-full border p-2 rounded">
                   <option value="">-- Sélectionner une franchise --</option>
-                  {franchises.map(f => (
-                    <option key={f.id} value={f.id}>{f.nom}</option>
-                  ))}
+                  {franchises.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
                 </select>
               </div>
               <Button onClick={handleSignup} disabled={loading} className="w-full bg-[#95C11F] text-[#1E4763] hover:bg-[#85ab1c]">
@@ -205,36 +163,17 @@ export default function AuthPage() {
           </Card>
         </TabsContent>
 
-        {/* --- CONNEXION --- */}
+        {/* Login */}
         <TabsContent value="login">
           <Card className="mt-4 bg-[#F9FAFB] border border-[#1E4763] shadow-md">
             <CardHeader>
               <CardTitle className="text-[#1E4763] text-center text-xl">Se connecter</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-3 p-4">
-              <div>
-                <Label>Email</Label>
-                <Input type="email" value={email} onChange={e => setEmail(e.target.value)} />
-              </div>
-              <div className="relative">
-                <Label>Mot de passe</Label>
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-[34px] text-sm text-gray-500"
-                  tabIndex={-1}
-                >
-                  {showPassword ? '🙈' : '👁️'}
-                </button>
-              </div>
+              <div><Label>Email *</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+              <div><Label>Mot de passe *</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
               <Button onClick={handleLogin} disabled={loading} className="w-full bg-[#95C11F] text-[#1E4763] hover:bg-[#85ab1c]">
-                {loading ? 'Connexion en cours...' : 'Se connecter'}
+                {loading ? 'Connexion...' : 'Se connecter'}
               </Button>
               {message && <p className="text-center text-sm mt-2">{message}</p>}
             </CardContent>
