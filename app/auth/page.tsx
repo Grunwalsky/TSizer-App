@@ -90,13 +90,7 @@ export default function AuthPage() {
         }),
       })
 
-      let result
-      try {
-       result = await res.json()
-      } catch {
-       result = { error: 'Erreur de réponse du serveur.' }
-      }
-
+      const result = await res.json()
       if (!res.ok) throw new Error(result.error || 'Erreur inconnue.')
       setMessage('✅ Compte créé avec succès ! Vérifie tes mails.')
     } catch (err: any) {
@@ -107,48 +101,27 @@ export default function AuthPage() {
   }
 
   const handleLogin = async () => {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    
+    let result
     try {
-      setLoading(true)
-      setMessage('')
-  
-      if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        setMessage('❌ L’adresse email n’est pas valide.')
-        return
-      }
-  
-      if (password.length < 8 || !/[a-z]/.test(password) || !/[A-Z]/.test(password)) {
-        setMessage('❌ Le mot de passe doit contenir au moins 8 caractères, une majuscule et une minuscule.')
-        return
-      }
-  
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-  
-      let result = { error: 'Erreur inconnue.' }
-  
-      try {
-        const text = await res.text()
-        result = text ? JSON.parse(text) : result
-      } catch (e) {
-        console.error('Erreur parsing JSON', e)
-      }
-  
-      if (!res.ok) {
-        throw new Error(result.error || 'Erreur inconnue.')
-      }
-  
-      setMessage('✅ Connexion réussie.')
-      // Tu peux rediriger ici si besoin
-    } catch (err: any) {
-      setMessage(`❌ Erreur : ${err.message}`)
-    } finally {
-      setLoading(false)
+      result = await res.json()
+    } catch (e) {
+      setMessage('❌ Erreur inconnue.')
+      return
     }
+    
+    if (!res.ok) {
+      setMessage(`❌ Erreur : ${result.error}`)
+      return
+    }
+    
+    setMessage('✅ Connexion réussie.')
   }
-  
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-white px-4 py-4">
