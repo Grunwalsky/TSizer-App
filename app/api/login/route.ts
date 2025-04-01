@@ -1,20 +1,16 @@
 // ✅ FICHIER : app/api/login/route.ts
-
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-// 👉 Obligatoire pour éviter l’erreur "File is not a module"
-export const dynamic = 'force-dynamic'
-
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
 export async function POST(req: Request) {
   const { email, password } = await req.json()
 
-  // Vérifier si l'utilisateur existe (dans la table users)
+  // Vérifier si l'utilisateur existe
   const { data: users, error: fetchError } = await supabase
     .from('users')
     .select('id')
@@ -28,18 +24,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Utilisateur non trouvé.' }, { status: 404 })
   }
 
-  // Connexion via Auth avec l'anon key
-  const authSupabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  // Connexion (utilise une instance avec ANON key pour auth)
+  const publicClient = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_ANON_KEY!
   )
 
-  const { error: signInError } = await authSupabase.auth.signInWithPassword({
-    email,
-    password,
-  })
+  const { error: loginError } = await publicClient.auth.signInWithPassword({ email, password })
 
-  if (signInError) {
+  if (loginError) {
     return NextResponse.json({ error: 'Mot de passe incorrect.' }, { status: 401 })
   }
 
