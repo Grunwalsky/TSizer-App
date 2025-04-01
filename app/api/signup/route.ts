@@ -25,11 +25,16 @@ export async function POST(req: Request) {
       )
     }
 
-    // 2. Créer l'utilisateur dans Supabase Auth (mail de confirmation activé par défaut)
+    // 2. Créer l'utilisateur dans Supabase Auth (validation admin supabase))
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
+      email_confirm: false, // ← n'envoie pas de mail
+      user_metadata: {
+        active: false, // ← on l’utilise pour savoir si tu as activé le compte manuellement
+      },
     })
+    
 
     if (authError) throw new Error(authError.message)
 
