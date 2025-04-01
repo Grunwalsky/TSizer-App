@@ -1,104 +1,67 @@
 // ✅ FICHIER : app/dashboard/projets/page.tsx
 
-// ✅ FICHIER : app/dashboard/projets/page.tsx
-
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/lib/supabase'
-import { cn } from '@/lib/utils'
-
-type Projet = {
-  id: string
-  etat: 'en_cours' | 'valide' | 'abandonne' | 'test'
-  nom: string
-  ville: string
-  telephone: string
-  responsable: string
-  date_creation: string
-}
-
-const STATUS_COLORS = {
-  en_cours: 'bg-yellow-400',
-  valide: 'bg-green-500',
-  abandonne: 'bg-red-500',
-  test: 'bg-gray-300',
-}
+import { Card } from '@/components/ui/card'
+import { Plus } from 'lucide-react'
+import Image from 'next/image'
 
 export default function ProjetsPage() {
-  const [projets, setProjets] = useState<Projet[]>([])
-
-  useEffect(() => {
-    // Pour l'instant on simule des données
-    setProjets([
-      {
-        id: '1',
-        etat: 'en_cours',
-        nom: 'Martin',
-        ville: 'Lyon',
-        telephone: '0601020304',
-        responsable: 'SM',
-        date_creation: '01/04/2025',
-      },
-      {
-        id: '2',
-        etat: 'valide',
-        nom: 'Dupont',
-        ville: 'Paris',
-        telephone: '0611223344',
-        responsable: 'AD',
-        date_creation: '30/03/2025',
-      },
-    ])
-  }, [])
-
   return (
-    <div className="px-6 py-4">
-      <h1 className="text-2xl font-bold text-[#1E4763]">Projets</h1>
-      <p className="text-sm text-gray-500 mb-6">Gérez vos projets</p>
+    <main className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-[#1E4763]">Projets</h1>
+          <p className="text-sm text-gray-500">Gérez vos projets</p>
+        </div>
+        <Button
+          className="bg-[#95C11F] text-white rounded-full w-10 h-10 hover:bg-[#85ab1c] shadow"
+          title="Ajouter un projet"
+        >
+          <Plus size={20} />
+        </Button>
+      </div>
 
-      <div className="space-y-4">
-        {projets.map(projet => (
-          <div
-            key={projet.id}
-            className="flex items-center justify-between bg-white shadow-sm rounded-md p-4 border border-gray-200"
-          >
-            <div className="flex items-center gap-3">
-              <span
-                className={cn(
-                  'w-4 h-4 rounded-full',
-                  STATUS_COLORS[projet.etat]
-                )}
-              />
-              <span className="font-medium">{projet.nom}</span>
-            </div>
-            <div className="text-gray-700">{projet.ville}</div>
-            <div className="text-gray-700">{projet.telephone}</div>
-            <div className="text-gray-700">
-              <div className="w-8 h-8 flex items-center justify-center bg-[#1E4763] text-white rounded-full text-sm font-semibold">
-                {projet.responsable}
-              </div>
-            </div>
-            <div className="text-gray-500 text-sm">{projet.date_creation}</div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon" className="text-sm">👁️</Button>
-              <Button variant="outline" size="icon" className="text-sm">✏️</Button>
-              <Button variant="destructive" size="icon" className="text-sm">🗑️</Button>
-            </div>
+      {/* En-tête des colonnes */}
+      <div className="grid grid-cols-7 gap-4 font-semibold text-gray-600 uppercase text-sm mb-2 px-2">
+        <div>État</div>
+        <div>Nom</div>
+        <div>Ville</div>
+        <div>Téléphone</div>
+        <div>Responsable</div>
+        <div>Date</div>
+        <div>Actions</div>
+      </div>
+
+      {/* Exemple de projet affiché */}
+      <Card className="grid grid-cols-7 gap-4 items-center mb-2 px-2 py-3 shadow-sm hover:shadow-md transition">
+        <div>
+          <span className="inline-block bg-yellow-400 w-3 h-3 rounded-full" title="En cours" />
+        </div>
+        <div>Jean Dupont</div>
+        <div>Lyon</div>
+        <div>06 00 00 00 00</div>
+        <div>
+          <div className="bg-gray-200 text-gray-800 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+            JD
           </div>
-        ))}
-      </div>
+        </div>
+        <div>01/04/2025</div>
+        <div className="flex space-x-2">
+          <button title="Voir le PDF">👁️</button>
+          <button title="Modifier">✏️</button>
+          <button title="Supprimer">🗑️</button>
+        </div>
+      </Card>
 
-      {/* Légende des pastilles */}
-      <div className="mt-6 text-sm text-gray-600 space-x-4">
-        <span><span className="inline-block w-3 h-3 rounded-full bg-yellow-400 mr-1" />En cours</span>
-        <span><span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-1" />Validé</span>
-        <span><span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-1" />Abandonné</span>
-        <span><span className="inline-block w-3 h-3 rounded-full bg-gray-300 mr-1" />Test</span>
+      {/* Légende en bas */}
+      <div className="mt-6 text-sm text-gray-500">
+        <p>Légende : <span className="inline-block bg-yellow-400 w-3 h-3 rounded-full mx-1" /> En cours |
+        <span className="inline-block bg-green-500 w-3 h-3 rounded-full mx-1" /> Validé |
+        <span className="inline-block bg-red-500 w-3 h-3 rounded-full mx-1" /> Abandonné |
+        <span className="inline-block bg-gray-300 w-3 h-3 rounded-full mx-1" /> Test</p>
       </div>
-    </div>
+    </main>
   )
 }
-
-  
