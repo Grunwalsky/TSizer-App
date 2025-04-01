@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/button'
 import { getUserFullName } from '@/lib/auth/utils'
 
 export default function InfosClientPage() {
-  const { id } = useParams()
-  const [formData, setFormData] = useState({
+  const params = useParams()
+  const projectId = params.id as string
+
+  const [projectData, setProjectData] = useState({
     nom: '',
     prenom: '',
     adresse: '',
@@ -19,16 +21,17 @@ export default function InfosClientPage() {
     email: '',
   })
 
-  const [etat, setEtat] = useState('')
-  const [dateCreation, setDateCreation] = useState('')
   const [userFullName, setUserFullName] = useState('')
+  const [createdAt, setCreatedAt] = useState('')
+  const [etat, setEtat] = useState('en_cours')
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
 
-  // dddCharger données si déjà existantes ddd
   useEffect(() => {
-    const fetchData = async () => {
-      const { data, error } = await supabase.from('projects').select().eq('id', id).single()
-      if (!error && data) {
-        setFormData({
+    const fetchProject = async () => {
+      const { data, error } = await supabase.from('projects').select('*').eq('id', projectId).single()
+      if (data) {
+        setProjectData({
           nom: data.nom || '',
           prenom: data.prenom || '',
           adresse: data.adresse || '',
@@ -37,53 +40,64 @@ export default function InfosClientPage() {
           telephone: data.telephone || '',
           email: data.email || '',
         })
-        setEtat(data.etat || '')
-        setDateCreation(new Date(data.created_at).toLocaleDateString('fr-FR'))
+        setCreatedAt(data.created_at?.split('T')[0])
+        setEtat(data.etat || 'en_cours')
       }
-
-      const name = await getUserFullName()
-      setUserFullName(name)
     }
 
-    fetchData()
-  }, [id])
+    const fetchUser = async () => {
+      const fullName = await getUserFullName()
+      setUserFullName(fullName)
+    }
+
+    fetchUser()
+    fetchProject()
+  }, [projectId])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setProjectData({ ...projectData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = async () => {
+  const handleSave = async () => {
+    setLoading(true)
     const { error } = await supabase
       .from('projects')
-      .update({ ...formData })
-      .eq('id', id)
+      .update(projectData)
+      .eq('id', projectId)
 
-    if (!error) alert('Infos enregistrées ! ✅')
-    else alert("❌ Erreur lors de l'enregistrement.")
+    if (error) {
+      setMessage("Erreur lors de l'enregistrement")
+    } else {
+      setMessage('✅ Données enregistrées')
+    }
+    setLoading(false)
   }
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <p className="text-sm text-gray-500">État du projet : <strong>{etat}</strong></p>
-        <p className="text-sm text-gray-500">Créé le : <strong>{dateCreation}</strong></p>
-        <p className="text-sm text-gray-500">Par : <strong>{userFullName}</strong></p>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <p className="text-gray-500 text-sm">État : <span className="font-semibold capitalize">{etat}</span></p>
+          <p className="text-gray-500 text-sm">Créé le : {createdAt}</p>
+          <p className="text-gray-500 text-sm">Par : {userFullName || 'Utilisateur inconnu'}</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input name="nom" value={formData.nom} onChange={handleChange} placeholder="Nom" />
-        <Input name="prenom" value={formData.prenom} onChange={handleChange} placeholder="Prénom" />
-        <Input name="adresse" value={formData.adresse} onChange={handleChange} placeholder="Adresse" />
-        <Input name="code_postal" value={formData.code_postal} onChange={handleChange} placeholder="Code postal" />
-        <Input name="ville" value={formData.ville} onChange={handleChange} placeholder="Ville" />
-        <Input name="telephone" value={formData.telephone} onChange={handleChange} placeholder="Téléphone" />
-        <Input name="email" value={formData.email} onChange={handleChange} placeholder="Email" />
+      <div className="grid grid-cols-2 gap-4">
+        <Input name="nom" placeholder="Nom" value={projectData.nom} onChange={handleChange} />
+        <Input name="prenom" placeholder="Prénom" value={projectData.prenom} onChange={handleChange} />
+        <Input name="adresse" placeholder="Adresse" value={projectData.adresse} onChange={handleChange} />
+        <Input name="code_postal" placeholder="Code postal" value={projectData.code_postal} onChange={handleChange} />
+        <Input name="ville" placeholder="Ville" value={projectData.ville} onChange={handleChange} />
+        <Input name="telephone" placeholder="Téléphone" value={projectData.telephone} onChange={handleChange} />
+        <Input name="email" placeholder="Adresse e-mail" type="email" value={projectData.email} onChange={handleChange} />
       </div>
 
-      <Button className="mt-6 bg-[#95C11F] hover:bg-[#85ab1c] text-white" onClick={handleSubmit}>
-        Enregistrer
+      {message && <p className="text-sm mt-4">{message}</p>}
+
+      <Button onClick={handleSave} disabled={loading} className="mt-6">
+        {loading ? 'Enregistrement...' : 'Enregistrer'}
       </Button>
     </div>
   )
-  }
+}
