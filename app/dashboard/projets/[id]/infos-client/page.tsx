@@ -23,7 +23,7 @@ export default function InfosClientPage() {
   const [dateCreation, setDateCreation] = useState('')
   const [userFullName, setUserFullName] = useState('')
 
-  // Charger données si déjà existantes ddd
+  // dddCharger données si déjà existantes ddd
   useEffect(() => {
     const fetchData = async () => {
       const { data, error } = await supabase.from('projects').select().eq('id', id).single()
