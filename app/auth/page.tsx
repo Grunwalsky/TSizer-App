@@ -110,23 +110,45 @@ export default function AuthPage() {
     try {
       setLoading(true)
       setMessage('')
-
+  
+      if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        setMessage('❌ L’adresse email n’est pas valide.')
+        return
+      }
+  
+      if (password.length < 8 || !/[a-z]/.test(password) || !/[A-Z]/.test(password)) {
+        setMessage('❌ Le mot de passe doit contenir au moins 8 caractères, une majuscule et une minuscule.')
+        return
+      }
+  
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
-
-      const result = await res.json()
-      if (!res.ok) throw new Error(result.error || 'Erreur inconnue.')
-
-      setMessage('✅ Connexion réussie !')
+  
+      let result = { error: 'Erreur inconnue.' }
+  
+      try {
+        const text = await res.text()
+        result = text ? JSON.parse(text) : result
+      } catch (e) {
+        console.error('Erreur parsing JSON', e)
+      }
+  
+      if (!res.ok) {
+        throw new Error(result.error || 'Erreur inconnue.')
+      }
+  
+      setMessage('✅ Connexion réussie.')
+      // Tu peux rediriger ici si besoin
     } catch (err: any) {
       setMessage(`❌ Erreur : ${err.message}`)
     } finally {
       setLoading(false)
     }
   }
+  
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-white px-4 py-4">
