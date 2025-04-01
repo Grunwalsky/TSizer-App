@@ -21,8 +21,10 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 
 export default function AuthPage() {
+  const router = useRouter()
   const [prenom, setPrenom] = useState('')
   const [nom, setNom] = useState('')
   const [email, setEmail] = useState('')
@@ -35,6 +37,9 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
 
   useEffect(() => {
     const fetchFranchises = async () => {
@@ -51,33 +56,28 @@ export default function AuthPage() {
     try {
       setLoading(true)
       setMessage('')
-  
+
       if (!franchiseId) {
         setMessage('❌ Veuillez sélectionner une franchise.')
         return
       }
-      
       if (!prenom.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/)) {
         setMessage('❌ Le prénom ne doit contenir que des lettres.')
         return
       }
-      
       if (!nom.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/)) {
         setMessage('❌ Le nom ne doit contenir que des lettres.')
         return
       }
-      
       if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
         setMessage('❌ L’adresse email n’est pas valide.')
         return
       }
-      
       if (password.length < 8 || !/[a-z]/.test(password) || !/[A-Z]/.test(password)) {
         setMessage('❌ Le mot de passe doit contenir au moins 8 caractères, une majuscule et une minuscule.')
         return
       }
-      
-  
+
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -91,13 +91,9 @@ export default function AuthPage() {
           franchise_id: franchiseId,
         }),
       })
-  
+
       const result = await res.json()
-  
-      if (!res.ok) {
-        throw new Error(result.error || 'Erreur inconnue.')
-      }
-  
+      if (!res.ok) throw new Error(result.error || 'Erreur inconnue.')
       setMessage('✅ Compte créé avec succès ! Vérifie tes mails.')
     } catch (err: any) {
       setMessage(`❌ Erreur : ${err.message}`)
@@ -105,7 +101,19 @@ export default function AuthPage() {
       setLoading(false)
     }
   }
-  
+
+  const handleLogin = async () => {
+    setLoginError('')
+    const { error } = await supabase.auth.signInWithPassword({
+      email: loginEmail,
+      password: loginPassword,
+    })
+    if (error) {
+      setLoginError('❌ Email ou mot de passe incorrect.')
+    } else {
+      router.push('/')
+    }
+  }
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-white px-4 py-4">
@@ -114,7 +122,7 @@ export default function AuthPage() {
       <Tabs defaultValue="signup" className="w-full max-w-lg">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="signup">Créer un compte</TabsTrigger>
-          <TabsTrigger value="login" disabled>Se connecter</TabsTrigger>
+          <TabsTrigger value="login">Se connecter</TabsTrigger>
         </TabsList>
 
         <TabsContent value="signup">
@@ -137,22 +145,21 @@ export default function AuthPage() {
               </div>
               <div className="relative">
                 <Label>Mot de passe *</Label>
-               <Input
-                 type={showPassword ? 'text' : 'password'}
-                value={password}
-                 onChange={e => setPassword(e.target.value)}
-                 className="pr-10"
-                   />
-               <button
-               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-               className="absolute right-2 top-[34px] text-sm text-gray-500"
-              tabIndex={-1}
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-[34px] text-sm text-gray-500"
+                  tabIndex={-1}
                 >
-              {showPassword ? '🙈' : '👁️'}
-             </button>
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
               </div>
-
               <div>
                 <Label>Téléphone</Label>
                 <Input value={telephone} onChange={e => setTelephone(e.target.value)} />
@@ -185,6 +192,31 @@ export default function AuthPage() {
                 {loading ? 'Création en cours...' : 'Créer le compte'}
               </Button>
               {message && <p className="text-center text-sm mt-2">{message}</p>}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="login">
+          <Card className="mt-4 bg-[#F9FAFB] border border-[#1E4763] shadow-md">
+            <CardHeader>
+              <CardTitle className="text-[#1E4763] text-center text-xl">Connexion</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 gap-3 p-4">
+              <div>
+                <Label>Email</Label>
+                <Input type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} />
+              </div>
+              <div>
+                <Label>Mot de passe</Label>
+                <Input type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} />
+              </div>
+              <Button onClick={handleLogin} className="w-full bg-[#95C11F] text-[#1E4763] hover:bg-[#85ab1c]">
+                Se connecter
+              </Button>
+              {loginError && <p className="text-center text-sm mt-2 text-red-500">{loginError}</p>}
+              <p className="text-right text-sm mt-1">
+                <a href="/reset-password" className="text-[#1E4763] underline">Mot de passe oublié ?</a>
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
