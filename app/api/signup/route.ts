@@ -44,13 +44,14 @@ export async function POST(req: Request) {
     }
 
     const { error: insertError } = await supabaseAdmin.from('users').insert({
-      id: authData.user.id,
+      id: authData.user?.id,
       prenom,
       nom,
       email,
       telephone: telephone || '',
       role,
       franchise_id,
+      active: false, // Ajouté ici
     })
 
     if (insertError) throw new Error('Erreur lors de l’enregistrement dans la base : ' + insertError.message)
