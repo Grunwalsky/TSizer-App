@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 
+
 export default function AuthPage() {
   const [tab, setTab] = useState<'signup' | 'login'>('signup')
   const [showPassword, setShowPassword] = useState(false)
@@ -104,8 +105,8 @@ export default function AuthPage() {
 
       if (!res.ok) throw new Error(result.error || 'Erreur inconnue.')
 
-      setMessage('✅ Mot de passe correct. Connexion...')
-      router.push('/dashboard') // À adapter selon ta structure
+      setMessage('✅ Connexion réussie.')
+      router.push('/dashboard/projets') // Redirection ici
     } catch (err: any) {
       setMessage(`❌ Erreur : ${err.message}`)
     } finally {
