@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 
-
 export default function AuthPage() {
   const [tab, setTab] = useState<'signup' | 'login'>('signup')
   const [showPassword, setShowPassword] = useState(false)
@@ -95,18 +94,17 @@ export default function AuthPage() {
         return
       }
 
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       })
 
-      const result = await res.json()
-
-      if (!res.ok) throw new Error(result.error || 'Erreur inconnue.')
+      if (error) {
+        throw new Error(error.message || 'Erreur inconnue.')
+      }
 
       setMessage('✅ Connexion réussie.')
-      router.push('/dashboard/projets') // Redirection ici
+      router.push('/dashboard/projets')
     } catch (err: any) {
       setMessage(`❌ Erreur : ${err.message}`)
     } finally {
