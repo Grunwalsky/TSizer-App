@@ -45,7 +45,7 @@ export default function InfosClientPage() {
       const {
         data: { user }
       } = await supabase.auth.getUser()
-
+      console.log('User récupéré :', user)
       if (user) {
         const { data: profile } = await supabase
           .from('users')
