@@ -17,10 +17,11 @@ export default function InfosClientPage() {
   const [email, setEmail] = useState('')
   const [etat, setEtat] = useState('en_cours')
   const [dateCreation, setDateCreation] = useState('')
-  const [userFullName, setUserFullName] = useState('')
+  const [userFullName, setUserFullName] = useState('Utilisateur inconnu')
 
+  // Chargement des données projet
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProject = async () => {
       const { data: project, error } = await supabase
         .from('projects')
         .select('*')
@@ -41,30 +42,31 @@ export default function InfosClientPage() {
           setDateCreation(new Date(project.created_at).toLocaleDateString('fr-FR'))
         }
       }
-
-      const {
-        data: { user }
-      } = await supabase.auth.getUser()
-      console.log('User récupéré :', user)
-      if (user) {
-        const { data: profile } = await supabase
-          .from('users')
-          .select('prenom, nom')
-          .eq('id', user.id)
-          .single()
-
-        if (profile) {
-          setUserFullName(`${profile.prenom} ${profile.nom}`)
-        } else {
-          setUserFullName('Utilisateur inconnu')
-        }
-      } else {
-        setUserFullName('Utilisateur inconnu')
-      }
     }
 
-    fetchData()
+    fetchProject()
   }, [id])
+
+  // Récupération du user connecté via onAuthStateChange
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const { data: userData, error } = await supabase
+          .from('users')
+          .select('prenom, nom')
+          .eq('id', session.user.id)
+          .single()
+
+        if (userData) {
+          setUserFullName(`${userData.prenom} ${userData.nom}`)
+        }
+      }
+    })
+
+    return () => {
+      authListener.subscription.unsubscribe()
+    }
+  }, [])
 
   const handleSave = async () => {
     const { error } = await supabase.from('projects').update({
