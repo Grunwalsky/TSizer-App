@@ -1,3 +1,5 @@
+// FICHIER app/auth/page.tsx
+
 'use client'
 
 import { useState, useEffect, ChangeEvent } from 'react'

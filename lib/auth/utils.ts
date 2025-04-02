@@ -1,3 +1,5 @@
+//FICHIER LIB/AUTH/UTILS.TS
+
 import { supabase } from '@/lib/supabase'
 
 export async function getUserFullName(): Promise<string> {
