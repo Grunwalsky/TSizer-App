@@ -1,5 +1,3 @@
-// FICHIER APP/DASHBOARD/PROJETS/[ID]/INFOS-CLIENT/PAGE.TSX
-
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -7,9 +5,12 @@ import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { useSupabaseUser } from '@/app/providers'
 
 export default function InfosClientPage() {
   const { id } = useParams()
+  const { user } = useSupabaseUser()
+
   const [nom, setNom] = useState('')
   const [prenom, setPrenom] = useState('')
   const [adresse, setAdresse] = useState('')
@@ -50,16 +51,12 @@ export default function InfosClientPage() {
 
   // 🔄 Chargement de l'utilisateur connecté
   useEffect(() => {
-    const fetchUserName = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (session?.user) {
+    const fetchUserFullName = async () => {
+      if (user) {
         const { data, error } = await supabase
           .from('users')
           .select('prenom, nom')
-          .eq('id', session.user.id)
+          .eq('id', user.id)
           .single()
 
         if (data) {
@@ -72,8 +69,8 @@ export default function InfosClientPage() {
       }
     }
 
-    fetchUserName()
-  }, [])
+    fetchUserFullName()
+  }, [user])
 
   const handleSave = async () => {
     const { error } = await supabase
