@@ -1,11 +1,8 @@
 // ✅ FICHIER : lib/auth/utils.ts
 
-'use server'
-
 import { cookies } from 'next/headers'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import type { Database } from '@/lib/types/supabase'
-
 
 export async function getUserFullName(): Promise<string> {
   const supabase = createServerComponentClient<Database>({ cookies })
