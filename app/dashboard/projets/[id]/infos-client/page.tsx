@@ -51,7 +51,7 @@ export default function InfosClientPage() {
     fetchProject()
   }, [id])
 
-  // 🔄 Chargement de l'utilisateur connecté
+  // 🔄 Chargement de l'utilisateur connectéé
   useEffect(() => {
     const fetchUserFullName = async () => {
       if (user) {
