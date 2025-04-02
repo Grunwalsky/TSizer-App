@@ -17,12 +17,12 @@ export default function InfosClientPage() {
   const [email, setEmail] = useState('')
   const [etat, setEtat] = useState('en_cours')
   const [dateCreation, setDateCreation] = useState('')
-  const [userFullName, setUserFullName] = useState('Utilisateur inconnu')
+  const [userFullName, setUserFullName] = useState('Chargement...')
 
-  // Chargement des données projet
+  // 🔄 Chargement du projet
   useEffect(() => {
     const fetchProject = async () => {
-      const { data: project, error } = await supabase
+      const { data: project } = await supabase
         .from('projects')
         .select('*')
         .eq('id', id)
@@ -37,7 +37,6 @@ export default function InfosClientPage() {
         setTelephone(project.telephone || '')
         setEmail(project.email || '')
         setEtat(project.etat || 'en_cours')
-
         if (project.created_at) {
           setDateCreation(new Date(project.created_at).toLocaleDateString('fr-FR'))
         }
@@ -47,37 +46,46 @@ export default function InfosClientPage() {
     fetchProject()
   }, [id])
 
-  // Récupération du user connecté via onAuthStateChange
+  // 🔄 Chargement de l'utilisateur connecté
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const fetchUserName = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
       if (session?.user) {
-        const { data: userData, error } = await supabase
+        const { data, error } = await supabase
           .from('users')
           .select('prenom, nom')
           .eq('id', session.user.id)
           .single()
 
-        if (userData) {
-          setUserFullName(`${userData.prenom} ${userData.nom}`)
+        if (data) {
+          setUserFullName(`${data.prenom} ${data.nom}`)
+        } else {
+          setUserFullName('Utilisateur non trouvé')
         }
+      } else {
+        setUserFullName('Non connecté')
       }
-    })
-
-    return () => {
-      authListener.subscription.unsubscribe()
     }
+
+    fetchUserName()
   }, [])
 
   const handleSave = async () => {
-    const { error } = await supabase.from('projects').update({
-      nom,
-      prenom,
-      adresse,
-      code_postal: codePostal,
-      ville,
-      telephone,
-      email
-    }).eq('id', id)
+    const { error } = await supabase
+      .from('projects')
+      .update({
+        nom,
+        prenom,
+        adresse,
+        code_postal: codePostal,
+        ville,
+        telephone,
+        email,
+      })
+      .eq('id', id)
 
     if (error) {
       alert("Erreur lors de l'enregistrement")
@@ -91,9 +99,11 @@ export default function InfosClientPage() {
       <div className="bg-gray-100 p-4 rounded-lg shadow-sm flex justify-between items-center">
         <div>
           <h2 className="text-lg font-bold text-[#1E4763]">État : {etat}</h2>
-          <p className="text-sm text-gray-500">Créé le : {dateCreation}</p>
+          <p className="text-sm text-gray-500">Créé le : {dateCreation || '...'}</p>
         </div>
-        <p className="text-sm italic text-gray-700">Connecté en tant que : {userFullName}</p>
+        <p className="text-sm italic text-gray-700">
+          Connecté en tant que : {userFullName}
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
