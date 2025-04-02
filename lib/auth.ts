@@ -1,4 +1,4 @@
-// ✅ FICHIER : lib/auth.ts (mise à jour sécurisée avec vérif majuscule+minuscule)
+// ✅ FICHIER : lib/auth.ts (mise à jour sécurisée avec vérif majuscule+minuscule)!!
 
 import { supabase } from './supabase'
 
