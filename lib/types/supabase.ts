@@ -42,6 +42,7 @@ export interface Database {
           created_at: string
         }
         Insert: {
+          id?: string
           nom: string
           prenom: string
           adresse: string
@@ -50,9 +51,10 @@ export interface Database {
           telephone?: string | null
           email?: string | null
           etat?: string
+          created_at?: string
         }
         Update: Partial<Database['public']['Tables']['projects']['Insert']>
-      }
+      }      
     }
   }
 }
