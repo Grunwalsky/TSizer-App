@@ -1,3 +1,5 @@
+//FICHIER lib/supabase.Ts
+
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = 'https://woqchgyedjremgfxezkj.supabase.co' // ← remplace ici

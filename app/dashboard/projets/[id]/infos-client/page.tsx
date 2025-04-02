@@ -1,3 +1,5 @@
+// FICHIER APP/DASHBOARD/PROJETS/[ID]/INFOS-CLIENT/PAGE.TSX
+
 'use client'
 
 import { useEffect, useState } from 'react'
