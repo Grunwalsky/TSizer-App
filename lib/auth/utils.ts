@@ -1,5 +1,3 @@
-// ✅ FICHIER : lib/auth/utils.ts
-
 import { supabase } from '@/lib/supabase'
 
 export async function getUserFullName(): Promise<string> {
