@@ -1,44 +1,43 @@
 'use client'
 
+import { createBrowserClient } from '@supabase/ssr'
 import { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import type { Session, User } from '@supabase/supabase-js'
+import { Session, User } from '@supabase/supabase-js'
 
-type SupabaseContextType = {
-  session: Session | null
+const SupabaseContext = createContext<{
   user: User | null
-}
-
-const SupabaseContext = createContext<SupabaseContextType>({
-  session: null,
+  session: Session | null
+}>({
   user: null,
+  session: null,
 })
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
+  const [supabase] = useState(() =>
+    createBrowserClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!
+    )
+  )
+
   const [session, setSession] = useState<Session | null>(null)
-  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const init = async () => {
-      const { data } = await supabase.auth.getSession()
-      setSession(data.session || null)
-      setUser(data.session?.user || null)
-    }
-
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session)
-      setUser(session?.user || null)
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session ?? null)
     })
 
-    init()
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
 
-    return () => {
-      listener.subscription.unsubscribe()
-    }
-  }, [])
+    return () => subscription.unsubscribe()
+  }, [supabase])
 
   return (
-    <SupabaseContext.Provider value={{ session, user }}>
+    <SupabaseContext.Provider value={{ session, user: session?.user ?? null }}>
       {children}
     </SupabaseContext.Provider>
   )

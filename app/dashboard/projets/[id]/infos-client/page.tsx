@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useSupabaseUser } from '@/app/providers'
 
+
 export default function InfosClientPage() {
   const { id } = useParams()
   const { user } = useSupabaseUser()
+  
 
   const [nom, setNom] = useState('')
   const [prenom, setPrenom] = useState('')
@@ -53,11 +55,13 @@ export default function InfosClientPage() {
   useEffect(() => {
     const fetchUserFullName = async () => {
       if (user) {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('users')
           .select('prenom, nom')
           .eq('id', user.id)
           .single()
+      
+      
 
         if (data) {
           setUserFullName(`${data.prenom} ${data.nom}`)
