@@ -21,32 +21,30 @@ export default function ProjetLayout({ children }: { children: React.ReactNode }
   const projectId = pathname?.split('/')[3]
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB]">
-      {/* ✅ Barre horizontale de navigation */}
-      <div className="bg-[#1E4763] text-white px-6 py-4 shadow-md flex items-center justify-between">
-        <div className="flex items-center space-x-6 overflow-x-auto">
-          <Image src={logo} alt="Logo TSizer" className="w-32 -rotate-12" />
-          {menuItems.map((item) => {
-            const isActive = pathname?.includes(item.path)
-            return (
-              <Link
-                key={item.path}
-                href={`/dashboard/projets/${projectId}/${item.path}`}
-                className={`px-4 py-2 rounded ${
-                  isActive
-                    ? 'bg-white text-[#1E4763] font-semibold'
-                    : 'hover:bg-[#95C11F] hover:text-[#1E4763]'
-                }`}
-              >
-                {item.label}
-              </Link>
-            )
-          })}
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#F9FAFB] flex flex-col">
+      {/* ✅ Barre horizontale de navigation en haut */}
+      <header className="bg-[#1E4763] text-white px-6 py-4 shadow-md flex items-center space-x-6">
+        <Image src={logo} alt="Logo TSizer" className="w-32 -rotate-12" />
+        {menuItems.map((item) => {
+          const isActive = pathname?.includes(item.path)
+          return (
+            <Link
+              key={item.path}
+              href={`/dashboard/projets/${projectId}/${item.path}`}
+              className={`px-4 py-2 rounded ${
+                isActive
+                  ? 'bg-white text-[#1E4763] font-semibold'
+                  : 'hover:bg-[#95C11F] hover:text-[#1E4763]'
+              }`}
+            >
+              {item.label}
+            </Link>
+          )
+        })}
+      </header>
 
       {/* ✅ Contenu principal */}
-      <main className="p-6">{children}</main>
+      <main className="flex-1 p-6">{children}</main>
     </div>
   )
 }
