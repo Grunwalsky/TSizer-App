@@ -1,4 +1,4 @@
-// ✅ FICHIER : app/dashboard/projets/[id]/layout.tsx
+'use client'
 
 import React from 'react'
 import Link from 'next/link'
@@ -18,34 +18,35 @@ const menuItems = [
 
 export default function ProjetLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const projectId = pathname?.split('/')[3]
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#1E4763] text-white flex flex-col">
-        <div className="h-24 flex items-center justify-center">
-          <Image src={logo} alt="Logo TSizer" className="w-40 -rotate-12" />
-        </div>
-        <nav className="flex-1 px-4 py-6 space-y-2">
+    <div className="min-h-screen bg-[#F9FAFB]">
+      {/* ✅ Barre horizontale de navigation */}
+      <div className="bg-[#1E4763] text-white px-6 py-4 shadow-md flex items-center justify-between">
+        <div className="flex items-center space-x-6 overflow-x-auto">
+          <Image src={logo} alt="Logo TSizer" className="w-32 -rotate-12" />
           {menuItems.map((item) => {
             const isActive = pathname?.includes(item.path)
             return (
               <Link
                 key={item.path}
-                href={`/dashboard/projets/${pathname?.split('/')[3]}/${item.path}`}
-                className={`block px-4 py-2 rounded-md transition-all ${
-                  isActive ? 'bg-white text-[#1E4763] font-semibold' : 'hover:bg-[#4A4441] hover:text-white'
+                href={`/dashboard/projets/${projectId}/${item.path}`}
+                className={`px-4 py-2 rounded ${
+                  isActive
+                    ? 'bg-white text-[#1E4763] font-semibold'
+                    : 'hover:bg-[#95C11F] hover:text-[#1E4763]'
                 }`}
               >
                 {item.label}
               </Link>
             )
           })}
-        </nav>
-      </aside>
+        </div>
+      </div>
 
-      {/* Contenu principal */}
-      <main className="flex-1 p-6 overflow-auto">{children}</main>
+      {/* ✅ Contenu principal */}
+      <main className="p-6">{children}</main>
     </div>
   )
 }
